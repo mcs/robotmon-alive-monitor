@@ -136,11 +136,11 @@ func monitorAndRestartProcess() {
 			logInfo("No requests were received for more than %s. Restarting process...", restartThreshold.String())
 
 			// Kill process
-			killCmd := exec.Command("taskkill", "/F", "/PID", strconv.Itoa(processID))
-			err := killCmd.Run()
+			killCmd := exec.Command("taskkill", "/F", "/T", "/PID", strconv.Itoa(processID))
+			stdout, err := killCmd.CombinedOutput()
 			processID = 0
 			if err != nil {
-				fmt.Println("Error killing process:", err)
+				fmt.Println("Error killing process:", stdout, ", rc = ", err)
 			}
 
 			// Wait 10 seconds
