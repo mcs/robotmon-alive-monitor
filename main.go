@@ -136,7 +136,7 @@ func monitorAndRestartProcess() {
 			logInfo("No requests were received for more than %s. Restarting process...", restartThreshold.String())
 
 			// Kill process
-			killCmd := exec.Command("taskkill", "/F", "/T", "/PID", strconv.Itoa(processID))
+			killCmd := exec.Command("tskill", strconv.Itoa(processID))
 			stdout, err := killCmd.CombinedOutput()
 			processID = 0
 			if err != nil {
