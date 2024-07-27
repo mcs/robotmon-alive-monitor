@@ -106,7 +106,7 @@ func startProcessIfNotRunning() {
 					if err != nil {
 						log.Fatal("Unable to fetch processId from tasklist", err)
 					}
-					if processIdInt > 0 && processIdInt < 65536 {
+					if processIdInt > 0 {
 						logInfo("Found already running process with id %d. Not starting a new process", processIdInt)
 						processID = processIdInt
 					}
