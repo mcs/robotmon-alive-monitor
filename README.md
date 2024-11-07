@@ -23,4 +23,5 @@ monitor.exe -port 12345 -process "C:\LDPlayer4.0\LDPlayer\dnplayer.exe index=0" 
 - `port` (required) needs to be a free TCP port. This will be used by the Robotmon script to contact the monitor.
 - `process` (required) needs to be the exact Windows command to start the Android emulator
 - `title` (optional) should be the title of the emulator window
-- `debug` shows more information at runtime like, for example, incoming requests
+- `idletime` (optional) do restart if this long no message has been received (default: 10)
+- `debug` (optional) shows more information at runtime like, for example, incoming requests

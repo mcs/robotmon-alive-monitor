@@ -13,21 +13,22 @@ import (
 	"time"
 )
 
-const restartThreshold = 10 * time.Minute // Time threshold for restarting the process
-
 var (
-	port            int
-	processCommand  string
-	processTitle    string
-	lastRequestTime time.Time
-	processID       int
-	debugLogs       bool
+	port             int
+	processCommand   string
+	processTitle     string
+	idleMinutes      int
+	restartThreshold time.Duration
+	lastRequestTime  time.Time
+	processID        int
+	debugLogs        bool
 )
 
 func init() {
 	flag.StringVar(&processCommand, "process", "", "Name of the process to manage")
 	flag.IntVar(&port, "port", 0, "Port number to listen on")
 	flag.StringVar(&processTitle, "title", "", "Title of the target window")
+	flag.IntVar(&idleMinutes, "idletime", 10, "Time in `minutes` which the game needs to be stuck or idle before restart is triggered")
 	flag.BoolVar(&debugLogs, "debug", false, "Log all HTTP requests on console?")
 	flag.Parse()
 
@@ -36,7 +37,8 @@ func init() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
-
+	restartThreshold = time.Duration(idleMinutes) * time.Minute
+	logDebug("idletime = " + restartThreshold.String())
 	logDebug("Startup successful")
 }
 
@@ -125,12 +127,13 @@ func startProcessIfNotRunning() {
 		processID = cmd.Process.Pid
 		logInfo("Process started with PID %s", strconv.Itoa(processID))
 	}
-	lastRequestTime = time.Now().Add(-restartThreshold + 5*time.Minute) // first message needs to be sent within 5 minutes
+	lastRequestTime = time.Now()
 }
 
 func monitorAndRestartProcess() {
 	for {
 		time.Sleep(1 * time.Minute)
+		logDebug("lastRequestTime = " + lastRequestTime.String())
 
 		if time.Since(lastRequestTime) > restartThreshold {
 			logInfo("No requests were received for more than %s. Restarting process...", restartThreshold.String())
