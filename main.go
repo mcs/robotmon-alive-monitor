@@ -165,7 +165,7 @@ func monitorAndRestartProcess() {
 }
 
 func getOutboundIP() net.IP {
-	// Destination here does not matter for UDP
+	// Destination here must be a valid one else it may give a loopback agddress
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		log.Fatal(err)
