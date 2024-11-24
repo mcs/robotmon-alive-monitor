@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/exec"
@@ -39,6 +40,10 @@ func init() {
 	}
 	restartThreshold = time.Duration(idleMinutes) * time.Minute
 	logDebug("idletime = " + restartThreshold.String())
+
+	ipAddress := GetOutboundIP().String()
+	logInfo("Your IP address is %s", ipAddress)
+
 	logDebug("Startup successful")
 }
 
@@ -157,4 +162,17 @@ func monitorAndRestartProcess() {
 			logInfo("WARNING: No requests were received for more than %s. Restarting process in one minute if still no request happened...", (restartThreshold - 1*time.Minute).String())
 		}
 	}
+}
+
+func GetOutboundIP() net.IP {
+	// Destination here does not matter for UDP
+	conn, err := net.Dial("udp", "0.0.0.0:0")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer conn.Close()
+
+	localAddress := conn.LocalAddr().(*net.UDPAddr)
+
+	return localAddress.IP
 }
