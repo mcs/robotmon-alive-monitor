@@ -143,8 +143,14 @@ func monitorAndRestartProcess() {
 		if time.Since(lastRequestTime) > restartThreshold {
 			logInfo("No requests were received for more than %s. Restarting process...", restartThreshold.String())
 
-			// Kill process
-			killCmd := exec.Command("tskill", strconv.Itoa(processID))
+			// Kill process using tskill or taskkill
+			var killCmd *exec.Cmd
+			if isCommandAvailable("tskill") {
+				killCmd = exec.Command("tskill", strconv.Itoa(processID))
+			} else {
+				killCmd = exec.Command("taskkill", "/F", "/PID", strconv.Itoa(processID))
+			}
+
 			stdout, err := killCmd.CombinedOutput()
 			processID = 0
 			if err != nil {
@@ -175,4 +181,9 @@ func getOutboundIP() net.IP {
 	localAddress := conn.LocalAddr().(*net.UDPAddr)
 
 	return localAddress.IP
+}
+
+func isCommandAvailable(command string) bool {
+	_, err := exec.LookPath(command)
+	return err == nil
 }
