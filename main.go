@@ -41,7 +41,7 @@ func init() {
 	restartThreshold = time.Duration(idleMinutes) * time.Minute
 	logDebug("idletime = " + restartThreshold.String())
 
-	ipAddress := GetOutboundIP().String()
+	ipAddress := getOutboundIP().String()
 	logInfo("Your IP address is %s", ipAddress)
 
 	logDebug("Startup successful")
