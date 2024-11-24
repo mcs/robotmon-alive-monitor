@@ -41,7 +41,7 @@ func init() {
 	restartThreshold = time.Duration(idleMinutes) * time.Minute
 	logDebug("idletime = " + restartThreshold.String())
 
-	ipAddress := getOutboundIP().String()
+	ipAddress := GetOutboundIP().String()
 	logInfo("Your IP address is %s", ipAddress)
 
 	logDebug("Startup successful")
@@ -166,7 +166,7 @@ func monitorAndRestartProcess() {
 
 func getOutboundIP() net.IP {
 	// Destination here does not matter for UDP
-	conn, err := net.Dial("udp", "0.0.0.0:0")
+	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		log.Fatal(err)
 	}
