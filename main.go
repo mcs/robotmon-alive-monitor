@@ -164,7 +164,7 @@ func monitorAndRestartProcess() {
 	}
 }
 
-func GetOutboundIP() net.IP {
+func getOutboundIP() net.IP {
 	// Destination here does not matter for UDP
 	conn, err := net.Dial("udp", "0.0.0.0:0")
 	if err != nil {
