@@ -148,7 +148,7 @@ func monitorAndRestartProcess() {
 			if isCommandAvailable("tskill") {
 				killCmd = exec.Command("tskill", strconv.Itoa(processID))
 			} else {
-				killCmd = exec.Command("taskkill", "/F", "/PID", strconv.Itoa(processID))
+				killCmd = exec.Command("taskkill", "/F", "/T", "/PID", strconv.Itoa(processID))
 			}
 
 			stdout, err := killCmd.CombinedOutput()
