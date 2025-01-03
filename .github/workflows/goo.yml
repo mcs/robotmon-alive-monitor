@@ -1,0 +1,69 @@
+# This workflow will build a golang project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
+
+name: Go
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.22'
+
+    - name: Build
+      run: env GOOS=windows go build -v .
+
+    - name: Archive monitor.exe artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: monitor-exe
+        path: monitor.exe
+        retention-days: 1
+        overwrite: true
+
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: monitor-exe
+      - name: Test artifact download
+        run: ls -R
+      - name: Delete old release and its tag
+        uses: dev-drprasad/delete-tag-and-release@v1.1
+        with:
+          tag_name: monitor_latest_dev
+          delete_release: true
+          github_token: ${{ secrets.GITHUB_TOKEN }} # (required) - a GitHub token with write access to the repo where tags and releases will be searched and deleted
+        continue-on-error: true
+      - name: Release artifact
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: monitor_latest_dev
+          release_name: Latest development release
+          draft: false
+          prerelease: true
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./monitor.exe
+          asset_name: monitor.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
