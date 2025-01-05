@@ -23,6 +23,7 @@ var (
 	lastRequestTime  time.Time
 	processID        int
 	debugLogs        bool
+	hasBeenCalled    bool
 )
 
 func init() {
@@ -57,10 +58,10 @@ func main() {
 	http.HandleFunc("/", handler)
 	go monitorAndRestartProcess()
 
-	logInfo("Server started on port %s", strconv.Itoa(port))
+	logInfo("ℹ️ Server started on port %s", strconv.Itoa(port))
 	err := http.ListenAndServe(":"+strconv.Itoa(port), nil)
 	if err != nil {
-		fmt.Println("HTTP serve error:", err)
+		fmt.Println("❌  HTTP serve error:", err)
 		os.Exit(1)
 	}
 }
@@ -68,8 +69,12 @@ func main() {
 func handler(w http.ResponseWriter, _ *http.Request) {
 	_, err := fmt.Fprintf(w, "OK")
 	if err != nil {
-		fmt.Println("HTTP handler error:", err)
+		fmt.Println("❌  HTTP handler error:", err)
 		os.Exit(1)
+	}
+	if !hasBeenCalled {
+		logInfo("✅  Connection from game successfully established")
+		hasBeenCalled = true
 	}
 	logDebug("received GET")
 	lastRequestTime = time.Now()
@@ -95,15 +100,15 @@ func startProcessIfNotRunning() {
 		filterQuery := fmt.Sprintf("WINDOWTITLE eq %s", processTitle)
 		stdout, err := exec.Command("cmd", "/C", "tasklist", "/FI", filterQuery, "/FO", "CSV", "/NH").CombinedOutput()
 		if err != nil {
-			log.Fatal("Unable to start tasklist command", err)
+			log.Fatal("❌  Unable to start tasklist command", err)
 		} else {
 			csvReader := csv.NewReader(strings.NewReader(string(stdout[:])))
 			records, err := csvReader.ReadAll()
 			if err != nil {
-				log.Fatal("Unable to parse file as CSV", err)
+				log.Fatal("❌  Unable to parse file as CSV", err)
 			}
 			if len(records) > 1 {
-				log.Fatal("Found more than one process with window title", processTitle)
+				log.Fatal("❌  Found more than one process with window title", processTitle)
 			}
 			if len(records) == 1 {
 				line := records[0]
@@ -111,10 +116,10 @@ func startProcessIfNotRunning() {
 					processIdStr := line[1]
 					processIdInt, err := strconv.Atoi(processIdStr)
 					if err != nil {
-						log.Fatal("Unable to fetch processId from tasklist", err)
+						log.Fatal("❌  Unable to fetch processId from tasklist", err)
 					}
 					if processIdInt > 0 {
-						logInfo("Found already running process with id %d. Not starting a new process", processIdInt)
+						logInfo("ℹ️ Found already running process with id %d. Not starting a new process", processIdInt)
 						processID = processIdInt
 					}
 				}
@@ -127,7 +132,7 @@ func startProcessIfNotRunning() {
 		cmd := exec.Command(command[0], command[1:]...)
 		err := cmd.Start()
 		if err != nil {
-			log.Fatal("Error starting process:", err)
+			log.Fatal("❌  Error starting process:", err)
 		}
 		processID = cmd.Process.Pid
 		logInfo("Process started with PID %s", strconv.Itoa(processID))
@@ -141,7 +146,7 @@ func monitorAndRestartProcess() {
 		logDebug("lastRequestTime = " + lastRequestTime.String())
 
 		if time.Since(lastRequestTime) > restartThreshold {
-			logInfo("No requests were received for more than %s. Restarting process...", restartThreshold.String())
+			logInfo("❗  No requests were received for more than %s. Restarting process...", restartThreshold.String())
 
 			// Kill process using tskill or taskkill
 			var killCmd *exec.Cmd
@@ -154,7 +159,7 @@ func monitorAndRestartProcess() {
 			stdout, err := killCmd.CombinedOutput()
 			processID = 0
 			if err != nil {
-				fmt.Println("Error killing process:", stdout, ", rc = ", err)
+				fmt.Println("❌  Error killing process:", stdout, ", rc = ", err)
 			}
 
 			// Wait 10 seconds
@@ -165,7 +170,7 @@ func monitorAndRestartProcess() {
 
 			lastRequestTime = time.Now()
 		} else if time.Since(lastRequestTime) > restartThreshold-1*time.Minute {
-			logInfo("WARNING: No requests were received for more than %s. Restarting process in one minute if still no request happened...", (restartThreshold - 1*time.Minute).String())
+			logInfo("⚠️ WARNING: No requests were received for more than %s. Restarting process in one minute if still no request happened...", (restartThreshold - 1*time.Minute).String())
 		}
 	}
 }
