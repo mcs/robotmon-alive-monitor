@@ -36,8 +36,8 @@ func findByTitle(processTitle string) Pid {
 					if err != nil {
 						log.Fatal("❌  Unable to fetch pId from tasklist", err)
 					}
-					if pId > 0 {
-						logInfo("ℹ️ Found already running process with id %d. Not starting a new process", pId)
+					if pId <= 0 {
+						logInfo("⚠️ Got pid %d which is a non-positive value", pId)
 					}
 				}
 			}
@@ -58,7 +58,7 @@ func kill(pId Pid) error {
 
 	stdout, err := killCmd.CombinedOutput()
 	if err != nil {
-		fmt.Println("❌  Error killing process:", stdout, ", rc = ", err)
+		logInfo("❌  Error killing process %d: %s, rc = %s", pid, stdout, err)
 	}
 	return err
 }

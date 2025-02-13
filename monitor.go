@@ -16,6 +16,8 @@ func startProcessIfNotRunning() {
 			log.Fatal("❌  Error starting process:", err)
 		}
 		logInfo("Process started with PID %s", strconv.Itoa(int(processID)))
+	} else {
+		logInfo("ℹ️ Found already running process with PID %d. Not starting a new process", processID)
 	}
 	lastRequestTime = time.Now()
 }
@@ -37,20 +39,17 @@ func monitorAndRestartProcess() {
 						// the process has a different process id than expected
 						err2 := kill(pId)
 						if err2 != nil {
-							logInfo("❌  Could neither kill the originally spawned process nor the one found by title")
-							log.Printf("  PID 1: %d, Error 1: %s\n", processID, err1)
-							log.Printf("  PID 2: %d, Error 2: %s\n", pId, err2)
+							logInfo("❌  Could neither kill the originally spawned pid %d nor pid %d found by title", processID, pId)
+							log.Printf("  PID %d error: %s\n", processID, err1)
+							log.Printf("  PID %d error: %s\n", pId, err2)
 						}
-						// situation rescued
 					} else {
 						logInfo("❌  Could not kill the originally spawned process and did not find existing one by title")
 						log.Printf("  PID: %d, Error: %s\n", processID, err1)
 					}
 				} else {
-					logInfo("❌  Could not kill the originally spawned process")
+					logInfo("❌  Could not kill the originally spawned process %d", processID)
 				}
-			} else {
-				// nice one
 			}
 
 			// Wait 10 seconds
