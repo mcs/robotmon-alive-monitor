@@ -6,11 +6,11 @@ import (
 )
 
 func logInfo(msg string, arg ...any) {
+	args := []any{time.Now().Format(time.DateTime)}
 	if len(arg) > 0 {
-		fmt.Printf("%s - "+msg+"\n", time.Now().Format(time.DateTime), arg)
-	} else {
-		fmt.Printf("%s - "+msg+"\n", time.Now().Format(time.DateTime))
+		args = append(args, arg)
 	}
+	fmt.Printf("%s - "+msg+"\n", args...)
 }
 
 func logDebug(msg string) {

@@ -58,7 +58,7 @@ func kill(pId Pid) error {
 
 	stdout, err := killCmd.CombinedOutput()
 	if err != nil {
-		logInfo("❌  Error killing process %d: %s, rc = %s", pid, stdout, err)
+		logInfo("❌  Error killing process %d: %s, rc = %s", int(pid), string(stdout), err.Error())
 	}
 	return err
 }

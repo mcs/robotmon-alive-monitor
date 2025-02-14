@@ -8,10 +8,13 @@ import (
 )
 
 func startProcessIfNotRunning() {
-	logInfo("Title = %s", processTitle)
-	processID = findByTitle(processTitle)
+	if strings.TrimSpace(processTitle) != "" {
+		logInfo("Title = %s", processTitle)
+		processID = findByTitle(processTitle)
+	}
 	if processID == 0 {
-		processID, err := startCommand(processCommand)
+		var err error
+		processID, err = startCommand(processCommand)
 		if err != nil {
 			log.Fatal("❌  Error starting process:", err)
 		}
@@ -56,6 +59,7 @@ func monitorAndRestartProcess() {
 			time.Sleep(10 * time.Second)
 
 			// Start process
+			processID = 0
 			startProcessIfNotRunning()
 
 			lastRequestTime = time.Now()
