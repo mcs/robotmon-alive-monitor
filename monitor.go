@@ -16,7 +16,7 @@ func startProcessIfNotRunning() {
 		var err error
 		processID, err = startCommand(processCommand)
 		if err != nil {
-			log.Fatal("❌  Error starting process:", err)
+			log.Fatal("❌  Error starting process: ", err)
 		}
 		logInfo("Process started with PID %s", strconv.Itoa(int(processID)))
 	} else {

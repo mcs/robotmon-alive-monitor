@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -58,19 +59,37 @@ func kill(pId Pid) error {
 
 	stdout, err := killCmd.CombinedOutput()
 	if err != nil {
-		logInfo("❌  Error killing process %d: %s, rc = %s", int(pid), string(stdout), err.Error())
+		logInfo("❌  Error killing process %d: %s, rc = %s", pid, string(stdout), err.Error())
 	}
 	return err
 }
 
 func startCommand(processCommand string) (Pid, error) {
+	logInfo("Received command parameter: %s", processCommand)
 	pid := 0
-	command := strings.Fields(processCommand)
-	logInfo("Start command: %s", processCommand)
-	cmd := exec.Command(command[0], command[1:]...)
-	err := cmd.Start()
-	if err == nil {
-		pid = cmd.Process.Pid
+	commandParams := strings.Fields(processCommand)
+	cmdIndex := 0
+	candidate := ""
+	for i := 1; cmdIndex == 0 && i <= len(commandParams); i++ {
+		candidate = strings.Join(commandParams[:i], " ")
+		logDebug("Found candidate: " + candidate)
+		_, err := os.Stat(candidate)
+		if err == nil {
+			// found a real file
+			cmdIndex = i
+		} else {
+			logDebug("Could not find file: " + candidate)
+		}
 	}
-	return Pid(pid), err
+	if cmdIndex > 0 {
+		cmd := exec.Command(candidate, commandParams[cmdIndex:]...)
+		err := cmd.Start()
+		if err == nil {
+			pid = cmd.Process.Pid
+		}
+		return Pid(pid), err
+
+	}
+	return Pid(pid), fmt.Errorf("could not resolve executable path in: %q", processCommand)
+
 }

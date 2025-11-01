@@ -64,7 +64,7 @@ func main() {
 }
 
 func getOutboundIP() net.IP {
-	// Destination here must be a valid one else it may give a loopback agddress
+	// Destination here must be valid, else it may give a loopback address
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
 		log.Fatal(err)
