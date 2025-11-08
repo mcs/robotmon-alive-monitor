@@ -18,7 +18,7 @@ func startProcessIfNotRunning() {
 		if err != nil {
 			log.Fatal("❌  Error starting process: ", err)
 		}
-		logInfo("Process started with PID %s", strconv.Itoa(int(processID)))
+		logInfo("ℹ️ Process started with PID %s", strconv.Itoa(int(processID)))
 	} else {
 		logInfo("ℹ️ Found already running process with PID %d. Not starting a new process", processID)
 	}

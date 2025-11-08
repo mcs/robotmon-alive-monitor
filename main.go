@@ -40,7 +40,7 @@ func init() {
 	logDebug("idletime = " + restartThreshold.String())
 
 	ipAddress := getOutboundIP().String()
-	logInfo("Your IP address is %s", ipAddress)
+	logInfo("Use this URL within Robotmon: *** http://" + ipAddress + ":" + strconv.Itoa(port) + " ***")
 
 	logDebug("Startup successful")
 }
